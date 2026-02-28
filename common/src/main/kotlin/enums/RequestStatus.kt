@@ -1,4 +1,4 @@
-package ru.nsu.klochikhina.manager.enums
+package enums
 
 enum class RequestStatus {
     PENDING,

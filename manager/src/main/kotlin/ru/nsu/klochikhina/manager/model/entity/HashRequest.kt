@@ -1,8 +1,8 @@
 package ru.nsu.klochikhina.manager.model.entity
 
+import enums.RequestStatus
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
-import ru.nsu.klochikhina.manager.enums.RequestStatus
 
 @Document(collection = "hash_requests")
 data class HashRequest(

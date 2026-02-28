@@ -1,7 +1,7 @@
 package ru.nsu.klochikhina.manager.service
 
+import enums.RequestStatus
 import org.springframework.stereotype.Service
-import ru.nsu.klochikhina.manager.enums.RequestStatus
 import ru.nsu.klochikhina.manager.model.entity.HashRequest
 import ru.nsu.klochikhina.manager.repository.RequestRepository
 
