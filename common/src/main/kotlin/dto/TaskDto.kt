@@ -6,5 +6,5 @@ data class TaskDto (
     val startIndex: Long,
     val count: Long,
     val targetHash: String,
-    val maxLength: Long
+    val maxLength: Int
 )

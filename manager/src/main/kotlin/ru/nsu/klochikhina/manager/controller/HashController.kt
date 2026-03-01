@@ -35,7 +35,7 @@ class HashController(
         return StatusResponseDto(
             request.id!!,
             request.status,
-            request.result
+            request.results
         )
     }
 
@@ -46,7 +46,7 @@ class HashController(
             taskId = UUID.randomUUID().toString(),
             requestId = "test-request-${UUID.randomUUID()}",
             startIndex = 0L,
-            count = 1000L,
+            count = 1000000L,
             targetHash = "e2fc714c4727ee9395f324cd2e7f331f",
             maxLength = 4
         )

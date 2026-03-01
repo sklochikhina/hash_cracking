@@ -22,6 +22,7 @@ class TaskProducer(private val rabbitTemplate: RabbitTemplate) {
         ) { msg ->
             msg.messageProperties.deliveryMode = MessageDeliveryMode.PERSISTENT
             msg.messageProperties.contentType = "application/json"
+            msg.messageProperties.contentEncoding = "UTF-8"
             msg
         }
     }
