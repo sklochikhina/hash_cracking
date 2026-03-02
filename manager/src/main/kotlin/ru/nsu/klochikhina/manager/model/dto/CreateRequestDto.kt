@@ -8,5 +8,6 @@ data class CreateRequestDto(
     val hash: String,
 
     @Positive(message = "Длина не может быть меньше единицы")
+    /*@Size(max = )*/
     val maxLength: Int
 )
