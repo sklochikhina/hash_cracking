@@ -28,7 +28,7 @@ class QueueRetryService(
     private val logger = org.slf4j.LoggerFactory.getLogger(QueueRetryService::class.java)
     private val running = AtomicBoolean(false)
 
-    @Scheduled(fixedDelayString = $$"${app.queue.retry.delay-ms:10000}")
+    @Scheduled(fixedDelayString = "${app.queue.retry.delay-ms:10000}")
     fun processQueuedTasksScheduled() {
         processQueuedOnce()
     }
