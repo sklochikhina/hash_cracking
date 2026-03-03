@@ -12,11 +12,13 @@ class RabbitConnectionListenerConfig(
     private val connectionFactory: CachingConnectionFactory,
     private val queueRetryService: QueueRetryService
 ) {
+    private val logger = org.slf4j.LoggerFactory.getLogger(RabbitConnectionListenerConfig::class.java)
 
     @PostConstruct
     fun init() {
         connectionFactory.addConnectionListener(object : ConnectionListener {
             override fun onCreate(connection: Connection?) {
+                logger.info("Rabbit connection created — triggering queued tasks processing")
                 queueRetryService.processQueuedNow()
             }
 

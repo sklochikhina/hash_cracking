@@ -6,8 +6,7 @@ import java.time.Instant
 
 @Document(collection = "queued_tasks")
 data class QueuedTask (
-    @Id
-    val id: String? = null,
+    @Id val id: String? = null,
     val taskId: String,
     val requestId: String,
     val payloadJson: String,    // сериализованный TaskDto (JSON)
@@ -23,6 +22,5 @@ data class QueuedTask (
 enum class QueuedTaskStatus {
     QUEUED,
     SENDING,
-    SENT,
     ERROR
 }

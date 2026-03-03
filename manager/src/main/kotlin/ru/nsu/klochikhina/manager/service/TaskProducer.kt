@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import rabbit.RabbitConstants
 import ru.nsu.klochikhina.manager.model.entity.QueuedTask
 import ru.nsu.klochikhina.manager.repository.QueuedTaskRepository
+import java.util.UUID
 
 @Service
 class TaskProducer(
@@ -35,6 +36,7 @@ class TaskProducer(
             }
         } catch (e: Exception) {
             val qt = QueuedTask(
+                id = UUID.randomUUID().toString(),
                 taskId = task.taskId,
                 requestId = task.requestId,
                 payloadJson = json,
@@ -42,7 +44,7 @@ class TaskProducer(
                 exchange = RabbitConstants.TASK_EXCHANGE
             )
             queuedTaskRepository.save(qt)
-            logger.warn("Rabbit unavailable — queued task ${task.taskId}", e)
+            logger.warn("Rabbit unavailable — queued task ${task.taskId} (request ${task.requestId}) : ${e.message}")
         }
     }
 }
