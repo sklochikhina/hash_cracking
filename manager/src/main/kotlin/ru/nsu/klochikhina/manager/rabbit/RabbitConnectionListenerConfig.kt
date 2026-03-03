@@ -17,7 +17,7 @@ class RabbitConnectionListenerConfig(
     @PostConstruct
     fun init() {
         connectionFactory.addConnectionListener(object : ConnectionListener {
-            override fun onCreate(connection: Connection?) {
+            override fun onCreate(connection: Connection) {
                 logger.info("Rabbit connection created — triggering queued tasks processing")
                 queueRetryService.processQueuedNow()
             }
