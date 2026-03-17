@@ -5,12 +5,12 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory
 import org.springframework.amqp.rabbit.connection.Connection
 import org.springframework.amqp.rabbit.connection.ConnectionListener
 import org.springframework.context.annotation.Configuration
-import ru.nsu.klochikhina.manager.service.QueueRetryService
+import ru.nsu.klochikhina.manager.service.OutboxDispatcher
 
 @Configuration
 class RabbitConnectionListenerConfig(
     private val connectionFactory: CachingConnectionFactory,
-    private val queueRetryService: QueueRetryService
+    private val outboxDispatcher: OutboxDispatcher
 ) {
     private val logger = org.slf4j.LoggerFactory.getLogger(RabbitConnectionListenerConfig::class.java)
 
@@ -19,7 +19,7 @@ class RabbitConnectionListenerConfig(
         connectionFactory.addConnectionListener(object : ConnectionListener {
             override fun onCreate(connection: Connection) {
                 logger.info("Rabbit connection created — triggering queued tasks processing")
-                queueRetryService.processQueuedNow()
+                outboxDispatcher.processQueuedNow()
             }
 
             override fun onClose(connection: Connection) {}

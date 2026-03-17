@@ -39,7 +39,7 @@ class ResultListener(
                 channel.basicAck(deliveryTag, false)
             } catch (e: Exception) {
                 logger.error("Couldn't save the result for the request=${resultMsg.requestId} after retries", e)
-                channel.basicNack(deliveryTag, false, false)
+                channel.basicNack(deliveryTag, false, true)
             }
 
         } catch (e: Exception) {

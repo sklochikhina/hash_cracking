@@ -1,15 +1,25 @@
-spring:
-  application:
-    name: manager
-
-  mongodb:
-    uri: mongodb://localhost:27017/hashdb
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-
 server:
-  port: 8080
+    port: 8080
+
+spring:
+    application:
+        name: manager
+
+    data:
+        mongodb:
+            host: localhost
+            port: 27017
+            auto-index-creation: true
+
+    rabbitmq:
+        host: localhost
+        port: 5672
+        username: guest
+        password: guest
+
+app:
+    queue:
+        retry:
+            delay-ms: 10000
+    taskSplitter:
+        frequency: 10000

@@ -30,6 +30,7 @@ class RabbitConfig {
         val factory = SimpleRabbitListenerContainerFactory()
         factory.setConnectionFactory(connectionFactory)
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL)
+        factory.setPrefetchCount(1) // TODO: тут ведь тоже нужно строго по одному сообщению брать?
         return factory
     }
 }

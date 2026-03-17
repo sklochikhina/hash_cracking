@@ -37,12 +37,11 @@ class WorkerListener(
 
             val results = bruteForce.findFirstMatch(task)
 
-            // TODO("error же отправляем, если не нашли подходящей строки?")
             val resultDto = ResultDto(
                 taskId = task.taskId,
                 requestId = task.requestId,
                 results = results,
-                status = if (results.isNotEmpty()) ResultStatus.DONE else ResultStatus.ERROR
+                status = ResultStatus.DONE // DONE = "задача обработана"
             )
 
             val json = mapper.writeValueAsString(resultDto)

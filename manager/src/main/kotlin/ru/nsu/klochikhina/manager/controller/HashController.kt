@@ -1,5 +1,6 @@
 package ru.nsu.klochikhina.manager.controller
 
+import enums.RequestStatus
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,7 +28,7 @@ class HashController(private val hashService: HashService) {
         val request = hashService.getStatus(requestId)
         return StatusResponseDto(
             request.id!!,
-            request.status,
+            if (request.status == RequestStatus.PENDING) RequestStatus.IN_PROGRESS else request.status,
             request.results
         )
     }

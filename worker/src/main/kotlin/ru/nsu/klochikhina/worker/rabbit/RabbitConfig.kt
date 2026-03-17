@@ -13,6 +13,7 @@ class RabbitConfig {
         val factory = SimpleRabbitListenerContainerFactory()
         factory.setConnectionFactory(connectionFactory)
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL)
+        factory.setPrefetchCount(1)
         return factory
     }
 }

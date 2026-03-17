@@ -17,9 +17,6 @@ data class Task (
     val maxLength: Int,
     val status: TaskStatus = TaskStatus.QUEUED,
 
-    val owner: String? = null,
-    val ownerLockUntil: Instant? = null,
-
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant = Instant.now()
 )
