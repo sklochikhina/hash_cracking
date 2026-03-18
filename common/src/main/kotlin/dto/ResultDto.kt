@@ -1,10 +1,10 @@
 package dto
 
-import enums.ResultStatus
+import enums.WorkerResultStatus
 
 data class ResultDto(
     val taskId: String,
     val requestId: String,
     val results: List<String>,
-    val status: ResultStatus
+    val status: WorkerResultStatus
 )
