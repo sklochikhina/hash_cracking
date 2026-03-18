@@ -12,7 +12,6 @@ import org.springframework.data.mongodb.core.findAndModify
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
-import org.springframework.data.mongodb.core.updateFirst
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import ru.nsu.klochikhina.manager.model.entity.HashRequest
@@ -28,9 +27,9 @@ class TaskSplitter(
 ) {
     private val logger = LoggerFactory.getLogger(TaskSplitter::class.java)
 
-    private var maxChunksPerTick: Int = 100
+    //private var maxChunksPerTick: Int = 100
 
-    @Scheduled(fixedDelayString = "\${app.taskSplitter.frequency:10000}")
+    @Scheduled(fixedDelayString = "\${app.taskSplitter.frequency:5000}")
     fun checkForPendingRequests() {
         val pending = requestRepository.findAllByStatus(RequestStatus.PENDING)
         for (req in pending) {
@@ -43,22 +42,53 @@ class TaskSplitter(
     }
 
     private fun processRequest(requestId: String, maxLength: Int) {
-        val total = totalCombinations(maxLength)
-        var processedThisTick = 0
+        val request = requestRepository.findById(requestId).orElse(null) ?: return
 
-        while (processedThisTick < maxChunksPerTick) {
+        val totalCombinations: Long
+        val totalTasks: Long
+        if (request.totalCombinations == 0L) {
+            val total = totalCombinations(maxLength)
+            val tasks = (total + CHUNK_SIZE - 1) / CHUNK_SIZE
+
             val query = Query(
                 Criteria.where("_id").`is`(requestId)
-                    .and("lastProcessedIndex").lt(total)
+                    .and("totalCombinations").`is`(0L)
+            )
+            val update = Update()
+                .set("totalCombinations", total)
+                .set("totalTasks", tasks)
+            val options = FindAndModifyOptions.options().returnNew(true)
+            val updated = mongoTemplate.findAndModify<HashRequest>(query, update, options)
+
+            if (updated != null) {
+                totalCombinations = updated.totalCombinations
+                totalTasks = updated.totalTasks
+            } else {
+                val refreshed = requestRepository.findById(requestId).orElseThrow()
+                totalCombinations = refreshed.totalCombinations
+                totalTasks = refreshed.totalTasks
+            }
+        } else {
+            totalCombinations = request.totalCombinations
+            totalTasks = request.totalTasks
+        }
+
+        var processedThisTick = 0
+
+        // TODO: нормально ли делать while true?
+        while (true) {
+            val query = Query(
+                Criteria.where("_id").`is`(requestId)
+                    .and("lastProcessedIndex").lt(totalCombinations)
             )
             val update = Update().inc("lastProcessedIndex", CHUNK_SIZE)
             val options = FindAndModifyOptions.options().returnNew(false)
             val prev: HashRequest = mongoTemplate.findAndModify<HashRequest>(query, update, options) ?: break
 
             val start = prev.lastProcessedIndex
-            if (start >= total) break
+            if (start >= totalCombinations) break
 
-            val count = min(CHUNK_SIZE, total - start)
+            val count = min(CHUNK_SIZE, totalCombinations - start)
 
             val taskDto = TaskDto(
                 taskId = UUID.randomUUID().toString(),
@@ -71,12 +101,8 @@ class TaskSplitter(
 
             try {
                 taskProducer.persistTask(taskDto)
-                mongoTemplate.updateFirst<HashRequest>(
-                    Query(Criteria.where("_id").`is`(requestId)),
-                    Update().inc("totalTasks", 1L)
-                )
             } catch (_: DuplicateKeyException) {
-                logger.warn("Duplicate task for request=$requestId start=$start — skipping (already exists)")
+                logger.warn("Duplicate task for request=$requestId start=$start – skipping (already exists)")
             } catch (e: Exception) {
                 logger.error("Failed to persist task (request=$requestId start=$start): ${e.message}", e)
             }
@@ -85,11 +111,11 @@ class TaskSplitter(
         }
 
         requestRepository.findById(requestId).ifPresent { r ->
-            if (r.lastProcessedIndex >= total) {
+            if (r.lastProcessedIndex >= totalCombinations) {
                 requestRepository.save(r.copy(status = RequestStatus.IN_PROGRESS))
-                logger.info("Request $requestId: splitting finished, totalTasks=${r.totalTasks}")
+                logger.info("Request $requestId: splitting finished, totalTasks=$totalTasks")
             } else {
-                logger.info("Request $requestId: splitting paused (lastProcessed=${r.lastProcessedIndex}, total=$total)")
+                logger.info("Request $requestId: splitting paused (lastProcessed=${r.lastProcessedIndex}, total=$totalCombinations)")
             }
         }
     }

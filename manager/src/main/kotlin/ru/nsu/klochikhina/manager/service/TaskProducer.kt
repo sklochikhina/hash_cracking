@@ -28,6 +28,6 @@ class TaskProducer(
             updatedAt = Instant.now()
         )
         taskRepository.save(t)
-        logger.info("persistTask saved task=${t.id} request=${t.requestId} start=${t.startIndex} count=${t.count}")
+        logger.debug("persistTask saved task=${t.id} request=${t.requestId} start=${t.startIndex} count=${t.count}")
     }
 }

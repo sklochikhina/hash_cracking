@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rabbitmq.client.Channel
 import dto.ResultDto
 import dto.TaskDto
-import enums.ResultStatus
+import enums.WorkerResultStatus
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.core.MessageDeliveryMode
@@ -41,7 +41,7 @@ class WorkerListener(
                 taskId = task.taskId,
                 requestId = task.requestId,
                 results = results,
-                status = ResultStatus.DONE // DONE = "задача обработана"
+                status = WorkerResultStatus.DONE // DONE = "задача обработана"
             )
 
             val json = mapper.writeValueAsString(resultDto)
