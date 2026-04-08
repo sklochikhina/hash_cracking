@@ -75,7 +75,6 @@ class TaskSplitter(
 
         var processedThisTick = 0
 
-        // TODO: нормально ли делать while true?
         while (true) {
             val query = Query(
                 Criteria.where("_id").`is`(requestId)

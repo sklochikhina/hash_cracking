@@ -16,6 +16,7 @@ data class Task (
     val targetHash: String,
     val maxLength: Int,
     val status: TaskStatus = TaskStatus.QUEUED,
+    var resultset: List<String> = emptyList(),
 
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant = Instant.now()

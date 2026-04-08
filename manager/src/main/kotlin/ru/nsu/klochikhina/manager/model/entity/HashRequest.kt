@@ -16,7 +16,6 @@ data class HashRequest(
     val status: RequestStatus = RequestStatus.PENDING,
     val results: List<String> = emptyList(),
     val totalTasks: Long = 0L,
-    val completedTasks: Long = 0L,
     val lastProcessedIndex: Long = 0L,
     @Version val version: Long? = null,
 )

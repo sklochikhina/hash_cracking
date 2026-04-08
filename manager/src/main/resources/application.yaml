@@ -24,3 +24,5 @@ app:
             delay-ms: 10000
     taskSplitter:
         frequency: 5000
+    reconcile:
+        interval: 2000

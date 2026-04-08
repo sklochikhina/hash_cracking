@@ -8,6 +8,7 @@ import dto.ResultDto
 import dto.TaskDto
 import enums.WorkerResultStatus
 import org.slf4j.LoggerFactory
+import org.springframework.amqp.AmqpException
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.core.MessageDeliveryMode
 import org.springframework.amqp.rabbit.annotation.RabbitListener
@@ -35,13 +36,22 @@ class WorkerListener(
             val body = String(message.body, StandardCharsets.UTF_8)
             val task = mapper.readValue<TaskDto>(body)
 
-            val results = bruteForce.findFirstMatch(task)
+            var results = emptyList<String>()
+            var resStatus: WorkerResultStatus
+
+            try {
+                results = bruteForce.findFirstMatch(task)
+                resStatus = WorkerResultStatus.DONE     // DONE = "задача обработана"
+            } catch (e: Exception) {
+                logger.error("Error processing task", e)
+                resStatus = WorkerResultStatus.ERROR    // ERROR = "ошибка во время перебора хешей"
+            }
 
             val resultDto = ResultDto(
                 taskId = task.taskId,
                 requestId = task.requestId,
                 results = results,
-                status = WorkerResultStatus.DONE // DONE = "задача обработана"
+                status = resStatus
             )
 
             val json = mapper.writeValueAsString(resultDto)
@@ -57,8 +67,11 @@ class WorkerListener(
             }
             channel.basicAck(deliveryTag, false)
 
+        } catch (e: AmqpException) {
+            logger.error("WORKER: Rabbit is unavailable, cannot send results", e)
+
         } catch (e: Exception) {
-            logger.error("Error processing task", e)
+            logger.error("WORKER: Unexpected error occurred while processing task", e)
             channel.basicNack(deliveryTag, false, true)
         }
     }
