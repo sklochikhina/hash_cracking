@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: mongo-rs-init
+    namespace: hash-cracking
+spec:
+    backoffLimit: 10
+    template:
+        spec:
+            restartPolicy: OnFailure
+            containers:
+                -   name: init
+                    image: mongo:7.0
+                    command:
+                        - sh
+                        - -lc
+                        - |
+                            echo "Waiting for mongo-0..."
+                            until mongosh --host mongo-0.mongo.hash-cracking.svc.cluster.local:27017 --quiet --eval 'db.adminCommand("ping").ok' | grep 1; do
+                              sleep 5
+                            done
+                            
+                            mongosh --host mongo-0.mongo.hash-cracking.svc.cluster.local:27017 <<'EOF'
+                            try {
+                              rs.status()
+                              print("Replica set already initialized")
+                            } catch (e) {
+                              rs.initiate({
+                                _id: "rs0",
+                                members: [
+                                  { _id: 0, host: "mongo-0.mongo.hash-cracking.svc.cluster.local:27017" },
+                                  { _id: 1, host: "mongo-1.mongo.hash-cracking.svc.cluster.local:27017" },
+                                  { _id: 2, host: "mongo-2.mongo.hash-cracking.svc.cluster.local:27017" }
+                                ]
+                              })
+                              print("Replica set initialized")
+                            }
+                            EOF

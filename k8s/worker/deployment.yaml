@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: worker
+    namespace: hash-cracking
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: worker
+    template:
+        metadata:
+            labels:
+                app: worker
+        spec:
+            containers:
+                -   name: worker
+                    image: worker:1.1
+                    imagePullPolicy: IfNotPresent
+                    env:
+                        -   name: SPRING_RABBITMQ_HOST
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: RABBITMQ_HOST
+                        -   name: SPRING_RABBITMQ_PORT
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: RABBITMQ_PORT
+                        -   name: SPRING_RABBITMQ_USERNAME
+                            valueFrom:
+                                secretKeyRef:
+                                    name: app-secret
+                                    key: RABBITMQ_USERNAME
+                        -   name: SPRING_RABBITMQ_PASSWORD
+                            valueFrom:
+                                secretKeyRef:
+                                    name: app-secret
+                                    key: RABBITMQ_PASSWORD
+                        -   name: RABBITMQ_QUEUE
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: RABBITMQ_QUEUE

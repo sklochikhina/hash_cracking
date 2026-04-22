@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: app-config
+    namespace: hash-cracking
+data:
+    MONGO_REPLICA_SET_NAME: rs0
+    MONGO_DB: hashdb
+    MONGO_HOSTS: mongodb://mongo-0.mongo.hash-cracking.svc.cluster.local:27017,mongo-1.mongo.hash-cracking.svc.cluster.local:27017,mongo-2.mongo.hash-cracking.svc.cluster.local:27017/?replicaSet=rs0&w=majority
+
+    RABBITMQ_HOST: my-rabbitmq
+    RABBITMQ_PORT: "5672"
+    RABBITMQ_QUEUE: task.queue
+
+    MANAGER_PORT: "8080"

@@ -12,7 +12,7 @@ COPY worker/src worker/src
 
 RUN mvn -pl manager -am -DskipTests package
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 COPY --from=build /app/manager/target/*.jar app.jar

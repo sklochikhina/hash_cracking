@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: manager
+    namespace: hash-cracking
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: manager
+    template:
+        metadata:
+            labels:
+                app: manager
+        spec:
+            containers:
+                -   name: manager
+                    image: manager:1.1
+                    imagePullPolicy: IfNotPresent
+                    ports:
+                        -   containerPort: 8080
+                    env:
+                        -   name: MONGO_REPLICA_SET_NAME
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: MONGO_REPLICA_SET_NAME
+                        -   name: MONGO_HOSTS
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: MONGO_HOSTS
+                        -   name: SPRING_DATA_MONGODB_URI
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: MONGO_HOSTS
+                        -   name: MONGO_DB
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: MONGO_DB
+                        -   name: RABBITMQ_HOST
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: RABBITMQ_HOST
+                        -   name: RABBITMQ_PORT
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: RABBITMQ_PORT
+                        -   name: RABBITMQ_QUEUE
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: RABBITMQ_QUEUE
+                        -   name: RABBITMQ_USERNAME
+                            valueFrom:
+                                secretKeyRef:
+                                    name: app-secret
+                                    key: RABBITMQ_USERNAME
+                        -   name: RABBITMQ_PASSWORD
+                            valueFrom:
+                                secretKeyRef:
+                                    name: app-secret
+                                    key: RABBITMQ_PASSWORD
+                        -   name: SPRING_RABBITMQ_HOST
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: RABBITMQ_HOST
+                        -   name: SPRING_RABBITMQ_PORT
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: app-config
+                                    key: RABBITMQ_PORT
+                        -   name: SPRING_RABBITMQ_USERNAME
+                            valueFrom:
+                                secretKeyRef:
+                                    name: app-secret
+                                    key: RABBITMQ_USERNAME
+                        -   name: SPRING_RABBITMQ_PASSWORD
+                            valueFrom:
+                                secretKeyRef:
+                                    name: app-secret
+                                    key: RABBITMQ_PASSWORD
+                    readinessProbe:
+                        tcpSocket:
+                            port: 8080
+                        initialDelaySeconds: 20
+                        periodSeconds: 10
+                    livenessProbe:
+                        tcpSocket:
+                            port: 8080
+                        initialDelaySeconds: 60
+                        periodSeconds: 20

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: mongo
+    namespace: hash-cracking
+spec:
+    serviceName: mongo
+    replicas: 3
+    selector:
+        matchLabels:
+            app: mongo
+    template:
+        metadata:
+            labels:
+                app: mongo
+        spec:
+            terminationGracePeriodSeconds: 30
+            containers:
+                -   name: mongo
+                    image: mongo:7.0
+                    command:
+                        - mongod
+                        - --replSet
+                        - rs0
+                        - --bind_ip_all
+                    ports:
+                        -   containerPort: 27017
+                            name: mongo
+                    readinessProbe:
+                        exec:
+                            command:
+                                - sh
+                                - -lc
+                                - mongosh --quiet --eval 'db.adminCommand("ping").ok' | grep 1
+                        periodSeconds: 10
+                        timeoutSeconds: 5
+                        initialDelaySeconds: 10
+                    livenessProbe:
+                        exec:
+                            command:
+                                - sh
+                                - -lc
+                                - mongosh --quiet --eval 'db.adminCommand("ping").ok' | grep 1
+                        periodSeconds: 20
+                        timeoutSeconds: 5
+                        initialDelaySeconds: 60
+                    volumeMounts:
+                        -   name: data
+                            mountPath: /data/db
+    volumeClaimTemplates:
+        -   metadata:
+                name: data
+            spec:
+                accessModes:
+                    - ReadWriteOnce
+                resources:
+                    requests:
+                        storage: 1Gi
